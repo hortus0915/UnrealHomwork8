@@ -7,7 +7,7 @@
 #include "SpartaGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/TextBlock.h"
-
+#include "Components/VerticalBox.h"
 
 
 ASpartaPlayerController::ASpartaPlayerController():
@@ -137,7 +137,6 @@ void ASpartaPlayerController::ShowGameHUD()
 	}
 }
 
-// 게임 시작 - BasicLevel 오픈, GameInstance 데이터 리셋
 void ASpartaPlayerController::StartGame()
 {
 	if (USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(UGameplayStatics::GetGameInstance(this)))
@@ -147,4 +146,44 @@ void ASpartaPlayerController::StartGame()
 	}
 
 	UGameplayStatics::OpenLevel(GetWorld(), FName("BasicLevel"));
+}
+
+void ASpartaPlayerController::GoToMainMenu()
+{
+	UGameplayStatics::OpenLevel(this, FName("MenuLevel"));
+}
+
+void ASpartaPlayerController::QuitGame()
+{
+	UKismetSystemLibrary::QuitGame(this, this, EQuitPreference::Quit, false);
+}
+
+void ASpartaPlayerController::AddDebuffMessage(const FString& Message, float Duration)
+{
+	if (!HUDWidgetInstance) return;
+
+	
+	if (UVerticalBox* MessageBox = Cast<UVerticalBox>(HUDWidgetInstance->GetWidgetFromName(TEXT("DebuffMessageBox"))))
+	{
+		
+		UTextBlock* NewMessage = NewObject<UTextBlock>(MessageBox);
+		if (NewMessage)
+		{
+			NewMessage->SetText(FText::FromString(Message));
+			NewMessage->SetColorAndOpacity(FSlateColor(FLinearColor::Red));
+			NewMessage->Font.Size = 18;
+
+			MessageBox->AddChildToVerticalBox(NewMessage);
+			
+			FTimerHandle TimerHandle;
+			FTimerDelegate RemoveDelegate;
+			RemoveDelegate.BindLambda([=]() {
+				if (NewMessage->IsValidLowLevel() && MessageBox->HasChild(NewMessage))
+				{
+					MessageBox->RemoveChild(NewMessage);
+				}
+			});
+			GetWorldTimerManager().SetTimer(TimerHandle, RemoveDelegate, Duration, false);
+		}
+	}
 }

@@ -58,7 +58,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UI")
 	UWidgetComponent* OverheadWidget;
-	
+
+	UPROPERTY(BlueprintReadWrite, Category="Debuff")
+	bool bIsReversed = false;
 
 protected:
 

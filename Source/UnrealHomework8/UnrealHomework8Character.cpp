@@ -13,6 +13,7 @@
 #include "Components/WidgetComponent.h"
 #include <Components/TextBlock.h>
 #include "SpartaGameStateBase.h"
+#include "Components/ProgressBar.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -118,6 +119,11 @@ void AUnrealHomework8Character::Move(const FInputActionValue& Value)
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
+	if (bIsReversed)
+	{
+		MovementVector *= -1.f;
+	}
+	
 	if (Controller != nullptr)
 	{
 		// find out which way is forward
@@ -202,6 +208,12 @@ void AUnrealHomework8Character::UpdateOverheadHP()
 	if (UTextBlock* HPText = Cast<UTextBlock>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverHeadHP"))))
 	{
 		HPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f / %.0f"), Health, MaxHealth)));
+	}
+
+	if (UProgressBar* HPBar = Cast<UProgressBar>(OverheadWidgetInstance->GetWidgetFromName(TEXT("HPBar"))))
+	{
+		const float Ratio = FMath::Clamp(Health / MaxHealth, 0.0f, 1.0f);
+		HPBar->SetPercent(Ratio);
 	}
 }
 

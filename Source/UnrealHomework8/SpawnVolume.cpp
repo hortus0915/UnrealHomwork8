@@ -1,6 +1,9 @@
 #include "SpawnVolume.h"
+
+#include "SpartaGameStateBase.h"
 #include "Components/BoxComponent.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
 
 ASpawnVolume::ASpawnVolume()
 {
@@ -13,6 +16,17 @@ ASpawnVolume::ASpawnVolume()
     SpawningBox->SetupAttachment(Scene);
 
     ItemDataTable = nullptr;
+}
+
+void ASpawnVolume::BeginPlay()
+{
+    Super::BeginPlay();
+
+    AGameStateBase* GameStateBase = UGameplayStatics::GetGameState(this);
+    if (ASpartaGameStateBase* SpartaState = Cast<ASpartaGameStateBase>(GameStateBase))
+    {
+        SpartaState->ConnectedSpawnVolume = this;
+    }
 }
 
 AActor* ASpawnVolume::SpawnRandomItem()
@@ -50,6 +64,27 @@ FVector ASpawnVolume::GetRandomPointInVolume() const
         FMath::FRandRange(-BoxExtent.Y, BoxExtent.Y),
         FMath::FRandRange(-BoxExtent.Z, BoxExtent.Z)
     );
+}
+
+void ASpawnVolume::SpawnWaveSpecials(int32 WaveIndex)
+{
+    if (!WaveSpawnInfos.IsValidIndex(WaveIndex)) return;
+
+    const FWaveSpawnInfo& Info = WaveSpawnInfos[WaveIndex];
+
+    if (Info.ActorToSpawn && Info.Count > 0)
+    {
+        for (int32 i = 0; i < Info.Count; ++i)
+        {
+            SpawnItem(Info.ActorToSpawn);
+        }
+
+        GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow,
+            FString::Printf(TEXT("[Wave %d] %s x%d 스폰됨"),
+            WaveIndex + 1,
+            *Info.ActorToSpawn->GetName(),
+            Info.Count));
+    }
 }
 
 FItemSpawnRow* ASpawnVolume::GetRandomItem() const

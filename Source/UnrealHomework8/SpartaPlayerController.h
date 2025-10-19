@@ -37,6 +37,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Menu")
 	void StartGame();
 
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void GoToMainMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "Menu")
+	void QuitGame();
+
+	UFUNCTION(BlueprintCallable)
+	void AddDebuffMessage(const FString& Message, float Duration = 3.0f);
 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;

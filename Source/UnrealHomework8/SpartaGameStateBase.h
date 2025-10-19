@@ -16,7 +16,7 @@ public:
 
 
 	virtual void BeginPlay() override;
-
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Score")
 	int32 Score;
 
@@ -38,9 +38,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	TArray<FName> LevelMapNames;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Wave")
+	int32 CurrentWaveIndex;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wave")
+	int32 MaxWaves = 3;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wave")
+	float WaveInterval = 10.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Wave")
+	class ASpawnVolume* ConnectedSpawnVolume;
+	
 	FTimerHandle LevelTimerHandle;
 	FTimerHandle HUDUpdateTimerHandle;
+	FTimerHandle WaveTimerHandle;
 
 	UFUNCTION(BlueprintPure, Category = "Score")
 	int32 GetScore() const;
@@ -51,8 +63,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Level")
 	void OnGameOver();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Wave")
+	void OnWaveStarted(int32 WaveIndex);
+
 	
 	void StartLevel();
+	void StartWave();
+	
+	void HandleWaveProgression();
+
 	void OnLevelTimeUp();
 	void OnCoinCollected();
 	void EndLevel();
